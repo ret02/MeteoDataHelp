@@ -1,0 +1,26 @@
+<h1>Temperature medie comunali (Modena)</h1>
+{{ graph_html|safe }}
+
+<h2>Historical Temperature Ranges:</h2>
+<p>Maximum Temperature: {{ historical_max }} °C</p>
+<p>Minimum Temperature: {{ historical_min }} °C</p>
+
+<h2>Monthly Mean Temperature</h2>
+<table style="border-collapse: collapse; width: 100%; border: 1px solid #ddd;">
+    <thead>
+        <tr style="background-color: #f2f2f2;">
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Year</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Month</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Average Temperature (°C)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in monthly_data %}
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ entry.Year }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ entry.Month }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ entry.TAVG|floatformat:1 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

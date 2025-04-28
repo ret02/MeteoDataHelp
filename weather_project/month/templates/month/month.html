@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Analysis for Modena</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h2>Temperature Analysis for Modena</h2>
+    <div id="chart"></div>
+
+    <script>
+    fetch("{% url 'process_month_data' %}")
+      .then(response => response.json())
+      .then(data => {
+        var traceTmin = {
+          x: data.date,
+          y: data.tmin,
+          mode: 'lines+markers',
+          name: 'Min Temperature',
+          line: { color: 'blue' }
+        };
+
+        var traceTmax = {
+          x: data.date,
+          y: data.tmax,
+          mode: 'lines+markers',
+          name: 'Max Temperature',
+          line: { color: 'red' }
+        };
+
+        var traceBox = {
+          x: data.date.concat(data.date),
+          y: data.p25.concat(data.p75),
+          fill: 'tonexty',
+          name: '25th-75th Percentile',
+          type: 'scatter',
+          mode: 'none',
+          fillcolor: 'rgba(0,100,255,0.2)'
+        };
+
+        var layout = {
+          title: 'Temperature Trends in Modena (Last 30 Days)',
+          xaxis: { title: 'Date' },
+          yaxis: { title: 'Temperature (°C)' }
+        };
+
+        Plotly.newPlot('chart', [traceTmin, traceTmax, traceBox], layout);
+      });
+    </script>
+</body>
+</html>

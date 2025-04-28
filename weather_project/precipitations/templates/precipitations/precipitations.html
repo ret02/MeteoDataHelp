@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Precipitation Analysis for Modena</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Precipitation Analysis for Modena</h1>
+    
+    <div id="chart"></div>
+
+    <script>
+        fetch('/precipitations/data/')
+        .then(response => response.json())
+        .then(data => {
+            var trace1 = {
+                x: data.date,
+                y: data.cumulative,
+                mode: 'lines+markers',
+                name: 'Current Year',
+                line: { color: 'blue', width: 2 }
+            };
+
+            var trace2 = {
+                x: data.date,
+                y: data.climate_max,
+                mode: 'lines',
+                name: 'Max (2001-2020)',
+                line: { color: 'lightgray' }
+            };
+
+            var trace3 = {
+                x: data.date,
+                y: data.p25,
+                mode: 'lines',
+                name: '25th Percentile',
+                line: { color: 'lightblue' }
+            };
+
+            var trace4 = {
+                x: data.date,
+                y: data.p75,
+                mode: 'lines',
+                name: '75th Percentile',
+                line: { color: 'lightblue' }
+            };
+
+            var layout = {
+                title: 'Cumulative Precipitation for Modena',
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Cumulative Precipitation (mm)' },
+                showlegend: true
+            };
+
+            var chartData = [trace1, trace2, trace3, trace4];
+            Plotly.newPlot('chart', chartData, layout);
+        })
+        .catch(error => console.error('Error loading precipitation data:', error));
+    </script>
+</body>
+</html>
