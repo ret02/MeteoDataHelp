@@ -1,0 +1,25 @@
+# Virtualenv
+env/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django
+*.sqlite3
+*.log
+
+# VSCode/PyCharm
+.vscode/
+.idea/
+
+# macOS/Linux
+.DS_Store
+.env
+
+# Docker
+*.pid
+*.db

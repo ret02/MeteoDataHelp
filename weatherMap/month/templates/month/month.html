@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analisi Temperature - ARPAE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #38343c;
+      --secondary-color: #4a90e2;
+      --accent-color: #f5a623;
+      --light-bg: #f8f9fa;
+      --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--light-bg);
+      color: var(--primary-color);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #2a272e 100%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .navbar-brand {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand svg {
+      margin-right: 10px;
+    }
+
+    .navbar-menu {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar-item {
+      margin-left: 1.5rem;
+      position: relative;
+    }
+
+    .navbar-link {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+      padding: 0.5rem 0;
+    }
+
+    .navbar-link:hover {
+      color: white;
+    }
+
+    .navbar-link svg {
+      margin-right: 8px;
+    }
+
+    .navbar-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--secondary-color);
+      transition: var(--transition);
+    }
+
+    .navbar-link:hover::after {
+      width: 100%;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #2a272e 100%);
+      color: white;
+      padding: 3rem 0;
+      text-align: center;
+      margin-bottom: 3rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2 {
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      margin: 2rem 0 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: var(--secondary-color);
+      border-radius: 3px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 2rem;
+      margin-bottom: 3rem;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .select-container {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      max-width: 400px;
+      margin: 1rem auto;
+    }
+
+    .select-container::after {
+      content: '▼';
+      font-size: 0.8rem;
+      color: var(--primary-color);
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    select {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-family: 'Montserrat', sans-serif;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background-color: white;
+      appearance: none;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    }
+
+    #chart {
+      width: 100%;
+      height: 500px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 1rem;
+      margin: 2rem 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem 1.8rem;
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      background-color: #3a7bc8;
+      transform: translateY(-2px);
+      box-shadow: 0 7px 14px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn svg {
+      margin-right: 8px;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    /* Mobile menu */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .navbar-menu {
+        flex-direction: column;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+
+      .navbar-menu.active {
+        max-height: 500px;
+        padding: 1rem 0;
+      }
+
+      .navbar-item {
+        margin: 0.5rem 0;
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .card {
+        padding: 1.5rem;
+      }
+      
+      #chart {
+        height: 400px;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .delay-1 {
+      animation-delay: 0.2s;
+    }
+
+    .delay-2 {
+      animation-delay: 0.4s;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar animate">
+    <div class="navbar-container">
+      <a href="/" class="navbar-brand">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        ARPAE Clima
+      </a>
+      
+      <button class="menu-toggle" id="mobile-menu">
+        ☰
+      </button>
+      
+      <ul class="navbar-menu" id="navbar-menu">
+        <li class="navbar-item">
+          <a href="{% url 'heater' %}" class="navbar-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <path d="M12 12v4"></path>
+              <path d="M12 12v4"></path>
+              <path d="M8 12v4"></path>
+              <path d="M16 12v4"></path>
+            </svg>
+            Gradi Giorno
+          </a>
+        </li>
+        <li class="navbar-item">
+          <a href="{% url 'history' %}" class="navbar-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <line x1="12" y1="7" x2="12" y2="13"></line>
+              <line x1="9" y1="10" x2="15" y2="10"></line>
+            </svg>
+            Storico
+          </a>
+        </li>
+        <li class="navbar-item">
+          <a href="{% url 'month' %}" class="navbar-link active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Ultimi 30 Giorni
+          </a>
+        </li>
+        <li class="navbar-item">
+          <a href="{% url 'precipitation' %}" class="navbar-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 13v8"></path>
+              <path d="M8 13v8"></path>
+              <path d="M12 15v8"></path>
+              <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
+            </svg>
+            Precipitazioni
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="animate delay-1">
+    <div class="container">
+      <h1>Andamento Temperature per Comune</h1>
+      <p>Analisi degli ultimi 30 giorni per {{ nome_comune }}</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card animate delay-1">
+      <div class="select-container">
+        <select id="comune-select">
+          {% for code, name in comuni.items %}
+            <option value="{{ code }}" {% if code == selected_comune %}selected{% endif %}>
+              {{ name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div id="chart" class="animate delay-1"></div>
+
+    <div class="text-center animate delay-2">
+      <a href="{% url 'home' %}" class="btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Torna alla Home
+      </a>
+    </div>
+  </main>
+
+  <footer class="animate delay-2">
+    <div class="container">
+      <p>© 2023 ARPAE - Tutti i diritti riservati</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Menu mobile toggle
+      const mobileMenuBtn = document.getElementById('mobile-menu');
+      const navbarMenu = document.getElementById('navbar-menu');
+      
+      mobileMenuBtn.addEventListener('click', () => {
+        navbarMenu.classList.toggle('active');
+      });
+      
+      // Aggiunge un delay per vedere l'animazione
+      setTimeout(() => {
+        document.querySelectorAll('.animate').forEach(el => {
+          el.style.opacity = '1';
+        });
+      }, 100);
+      
+      // Chiude il menu mobile quando si clicca su un link
+      const navLinks = document.querySelectorAll('.navbar-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            navbarMenu.classList.remove('active');
+          }
+        });
+      });
+
+      // Funzionalità del grafico
+      const select = document.getElementById("comune-select");
+
+      function loadChart(comuneCode) {
+          fetch("{% url 'month-data' %}?comune=" + comuneCode)
+              .then(response => response.json())
+              .then(data => {
+                  const traceTmin = {
+                      x: data.date,
+                      y: data.tmin,
+                      mode: 'lines+markers',
+                      name: 'Temperatura Minima',
+                      line: { color: '#4a90e2' }
+                  };
+
+                  const traceTmax = {
+                      x: data.date,
+                      y: data.tmax,
+                      mode: 'lines+markers',
+                      name: 'Temperatura Massima',
+                      line: { color: '#e24a4a' }
+                  };
+
+                  const traceBox = {
+                      x: data.date.concat(data.date),
+                      y: data.p25.concat(data.p75),
+                      fill: 'tonexty',
+                      name: '25° - 75° Percentile',
+                      type: 'scatter',
+                      mode: 'none',
+                      fillcolor: 'rgba(74, 144, 226, 0.2)'
+                  };
+
+                  const layout = {
+                      title: 'Trend Temperature - Ultimi 30 Giorni',
+                      xaxis: { title: 'Data' },
+                      yaxis: { title: 'Temperatura (°C)' },
+                      legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2 },
+                      plot_bgcolor: 'rgba(0,0,0,0)',
+                      paper_bgcolor: 'rgba(0,0,0,0)',
+                      font: { family: 'Montserrat, sans-serif' }
+                  };
+
+                  Plotly.newPlot('chart', [traceTmin, traceTmax, traceBox], layout);
+              });
+      }
+
+      select.addEventListener("change", () => {
+          loadChart(select.value);
+          // Aggiorna l'URL senza ricaricare la pagina
+          history.pushState(null, '', `?comune=${select.value}`);
+      });
+
+      // Carica grafico iniziale
+      loadChart(select.value);
+    });
+  </script>
+</body>
+</html>
